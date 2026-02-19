@@ -14,19 +14,13 @@ const VIEWS = [
     key: "surface",
     label: "Surface",
     description:
-      "The sRGB gamut boundary rendered as a translucent triangulated surface with a point cloud overlay. The shape of this landscape reveals how the maximum achievable chroma varies across hue and lightness.",
+      "The sRGB gamut boundary mapped in OKLCH coordinates, where the X axis is lightness (L), the Z axis is hue (H), and height is chroma (C). The shape of this landscape reveals that the maximum achievable saturation varies dramatically across hue and brightness.",
   },
   {
     key: "scattered",
     label: "Scattered",
     description:
       "Each gamut-edge sample randomly offset from the surface, creating a cloud of colour particles. The density of points shows where the gamut boundary is densely sampled by the brute-force RGB scan.",
-  },
-  {
-    key: "wireframe",
-    label: "Wireframe",
-    description:
-      "The Delaunay triangulation edges that form the gamut surface. This shows the underlying mesh structure, triangulated on the lightness-hue plane with chroma as the elevation.",
   },
   {
     key: "heatmap",
@@ -94,14 +88,6 @@ const ColorTokenGeneratorSolidHero = dynamic(
   { ssr: false, loading: LoadingSpinner }
 );
 
-const GamutWireframeHero = dynamic(
-  () =>
-    import("@/content/components/gamut-wireframe-hero").then(
-      (m) => m.GamutWireframeHero
-    ),
-  { ssr: false, loading: LoadingSpinner }
-);
-
 const GamutHeatmapHero = dynamic(
   () =>
     import("@/content/components/gamut-heatmap-hero").then(
@@ -137,7 +123,6 @@ const GamutP3Hero = dynamic(
 const viewComponents: Record<ViewKey, React.ComponentType> = {
   surface: ColorTokenGeneratorMixedHero,
   scattered: ColorTokenGeneratorScatteredHero,
-  wireframe: GamutWireframeHero,
   heatmap: GamutHeatmapHero,
   lightness: GamutLightnessHero,
   constantL: GamutConstantLHero,
