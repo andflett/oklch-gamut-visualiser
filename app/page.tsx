@@ -10,10 +10,10 @@ import {
 } from "@/components/ui/popover";
 
 const VIEWS = [
-  { key: "solid", label: "Solid" },
   { key: "surface", label: "Surface" },
-  { key: "points", label: "Point Cloud" },
   { key: "scattered", label: "Scattered" },
+  { key: "points", label: "Point Cloud" },
+  { key: "solid", label: "Solid" },
 ] as const;
 
 type ViewKey = (typeof VIEWS)[number]["key"];
@@ -66,7 +66,7 @@ const viewComponents: Record<ViewKey, React.ComponentType> = {
 };
 
 export default function Page() {
-  const [activeView, setActiveView] = React.useState<ViewKey>("solid");
+  const [activeView, setActiveView] = React.useState<ViewKey>("surface");
   const ActiveComponent = viewComponents[activeView];
 
   const activeIndex = VIEWS.findIndex((v) => v.key === activeView);
