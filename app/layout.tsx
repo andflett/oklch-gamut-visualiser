@@ -2,35 +2,36 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "OKLCH Gamut Visualiser — Interactive 3D Colour Space Explorer",
+  title: "OKLCH Colour Space — Interactive 3D Explorer",
   description:
-    "Explore the OKLCH colour space in 3D. Visualise the sRGB gamut boundary as a solid surface, scattered particles, or point cloud — built with Three.js and React Three Fiber.",
+    "Explore the OKLCH colour space in 3D. Visualise the sRGB boundary as a solid surface, heatmap, lightness map, or P3 vs sRGB comparison — built with Three.js and React Three Fiber.",
   keywords: [
     "OKLCH",
     "colour space",
     "color space",
-    "gamut",
     "3D visualisation",
     "sRGB",
+    "Display P3",
     "Three.js",
     "React Three Fiber",
     "colour theory",
     "perceptual colour",
     "CSS colors",
     "web colours",
+    "oklch.space",
   ],
   openGraph: {
-    title: "OKLCH Gamut Visualiser",
+    title: "OKLCH Colour Space",
     description:
-      "Interactive 3D visualisation of the OKLCH colour space gamut boundary — surface, point cloud, and scattered particle views.",
+      "Interactive 3D visualisation of the OKLCH colour space — surface, heatmap, lightness, P3 vs sRGB, and more.",
     type: "website",
-    siteName: "OKLCH Gamut Visualiser",
+    siteName: "OKLCH Colour Space",
   },
   twitter: {
     card: "summary_large_image",
-    title: "OKLCH Gamut Visualiser",
+    title: "OKLCH Colour Space",
     description:
-      "Explore the OKLCH colour space in 3D. Visualise the sRGB gamut boundary as a solid surface, scattered particles, or point cloud.",
+      "Explore the OKLCH colour space in 3D. Seven interactive views showing how lightness, chroma, and hue relate across colour spaces.",
   },
   robots: {
     index: true,
