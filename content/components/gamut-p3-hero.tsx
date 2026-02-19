@@ -5,6 +5,7 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import { generateLandscapeMesh } from "./oklch-gamut-landscape";
+import { ResponsiveFov } from "./responsive-fov";
 
 // Generate both sRGB and P3 gamut meshes.
 // The P3 gamut extends further in chroma for saturated reds, greens, and cyans.
@@ -147,6 +148,7 @@ export function GamutP3Hero() {
       gl={{ antialias: true, alpha: true }}
       style={{ background: "transparent", width: "100%", height: "100%" }}
     >
+      <ResponsiveFov />
       <P3vsSRGBGamut />
       <OrbitControls
         target={[0, -0.02, 0]}

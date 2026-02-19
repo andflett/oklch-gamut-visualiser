@@ -5,6 +5,7 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import { generateLandscapeMesh } from "./oklch-gamut-landscape";
+import { ResponsiveFov } from "./responsive-fov";
 
 const meshData = generateLandscapeMesh();
 
@@ -49,6 +50,7 @@ export function ColorTokenGeneratorScatteredHero() {
       gl={{ antialias: true, alpha: true }}
       style={{ background: "transparent", width: "100%", height: "100%" }}
     >
+      <ResponsiveFov />
       <ScatteredGamutCloud />
       <OrbitControls
         target={[0, 0, 0]}

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import dynamic from "next/dynamic";
-import { Info, Move, Loader2 } from "lucide-react";
+import { Info, Move, Loader2, ChevronDown } from "lucide-react";
 import {
   Popover,
   PopoverTrigger,
@@ -130,16 +130,73 @@ const viewComponents: Record<ViewKey, React.ComponentType> = {
   solid: ColorTokenGeneratorSolidHero,
 };
 
-export default function Page() {
-  const [activeView, setActiveView] = React.useState<ViewKey>("surface");
-  const ActiveComponent = viewComponents[activeView];
-  const activeViewData = VIEWS.find((v) => v.key === activeView)!;
+function MobileViewSwitcher({
+  activeView,
+  onSelect,
+}: {
+  activeView: ViewKey;
+  onSelect: (key: ViewKey) => void;
+}) {
+  const [open, setOpen] = React.useState(false);
+  const ref = React.useRef<HTMLDivElement>(null);
+  const activeLabel = VIEWS.find((v) => v.key === activeView)!.label;
 
+  React.useEffect(() => {
+    if (!open) return;
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("pointerdown", handleClick);
+    return () => document.removeEventListener("pointerdown", handleClick);
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative md:hidden">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="flex items-center gap-1 cursor-pointer rounded-full bg-slate-900/80 backdrop-blur-sm border border-slate-700/60 px-3 py-1.5 text-xs font-medium text-white"
+      >
+        {activeLabel}
+        <ChevronDown
+          size={12}
+          className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      {open && (
+        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 rounded-lg bg-slate-900/95 backdrop-blur-sm border border-slate-700/60 py-1 min-w-[140px] shadow-xl">
+          {VIEWS.map(({ key, label }) => (
+            <button
+              key={key}
+              onClick={() => { onSelect(key); setOpen(false); }}
+              className={`
+                block w-full text-left cursor-pointer px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors duration-150
+                ${activeView === key ? "text-white bg-slate-700/50" : "text-slate-400 hover:text-white hover:bg-slate-800/50"}
+              `}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DesktopPillTabs({
+  activeView,
+  onSelect,
+}: {
+  activeView: ViewKey;
+  onSelect: (key: ViewKey) => void;
+}) {
   const activeIndex = VIEWS.findIndex((v) => v.key === activeView);
   const tabRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
   const [pillStyle, setPillStyle] = React.useState<React.CSSProperties>({});
 
-  React.useEffect(() => {
+  const updatePill = React.useCallback(() => {
     const el = tabRefs.current[activeIndex];
     if (el) {
       setPillStyle({
@@ -149,6 +206,44 @@ export default function Page() {
     }
   }, [activeIndex]);
 
+  React.useEffect(() => {
+    updatePill();
+    window.addEventListener("resize", updatePill);
+    return () => window.removeEventListener("resize", updatePill);
+  }, [updatePill]);
+
+  return (
+    <div className="hidden md:block">
+      <div className="relative flex items-center rounded-full bg-slate-900/80 backdrop-blur-sm border border-slate-700/60 p-0.5">
+        {/* Sliding pill indicator */}
+        <div
+          className="absolute top-0.5 left-0 h-[calc(100%-4px)] rounded-full bg-white shadow-sm transition-all duration-300 ease-out"
+          style={pillStyle}
+        />
+
+        {VIEWS.map(({ key, label }, i) => (
+          <button
+            key={key}
+            ref={(el) => { tabRefs.current[i] = el; }}
+            onClick={() => onSelect(key)}
+            className={`
+              relative z-10 cursor-pointer px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors duration-200
+              ${activeView === key ? "text-slate-900" : "text-slate-400 hover:text-white"}
+            `}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default function Page() {
+  const [activeView, setActiveView] = React.useState<ViewKey>("surface");
+  const ActiveComponent = viewComponents[activeView];
+  const activeViewData = VIEWS.find((v) => v.key === activeView)!;
+
   return (
     <div className="h-dvh w-dvw overflow-hidden bg-slate-950">
       {/* Visualisation */}
@@ -156,33 +251,10 @@ export default function Page() {
         <ActiveComponent />
       </div>
 
-      {/* Pill tabs — top centre */}
+      {/* View switcher — top centre */}
       <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10">
-        <div className="relative flex items-center rounded-full bg-slate-900/80 backdrop-blur-sm border border-slate-700/60 p-0.5">
-          {/* Sliding pill indicator */}
-          <div
-            className="absolute top-0.5 left-0 h-[calc(100%-4px)] rounded-full bg-white shadow-sm transition-all duration-300 ease-out"
-            style={pillStyle}
-          />
-
-          {VIEWS.map(({ key, label }, i) => (
-            <button
-              key={key}
-              ref={(el) => { tabRefs.current[i] = el; }}
-              onClick={() => setActiveView(key)}
-              className={`
-                relative z-10 cursor-pointer px-3 py-1 rounded-full text-xs font-medium transition-colors duration-200
-                ${
-                  activeView === key
-                    ? "text-slate-900"
-                    : "text-slate-400 hover:text-white"
-                }
-              `}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+        <MobileViewSwitcher activeView={activeView} onSelect={setActiveView} />
+        <DesktopPillTabs activeView={activeView} onSelect={setActiveView} />
       </div>
 
       {/* Bottom-right controls */}
