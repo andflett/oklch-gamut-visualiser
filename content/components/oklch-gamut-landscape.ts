@@ -50,6 +50,10 @@ export interface LandscapeMeshData {
   positions: Float32Array;
   colors: Float32Array;
   indices: Uint32Array;
+  /** Raw coordinates: [lightness, chroma (scaled), hue (0-1)] per vertex */
+  rawCoords: [number, number, number][];
+  /** Raw sRGB vertex colours before boost/linearisation */
+  rawColors: [number, number, number][];
 }
 
 export function generateLandscapeMesh(step = 0.01): LandscapeMeshData {
@@ -112,5 +116,5 @@ export function generateLandscapeMesh(step = 0.01): LandscapeMeshData {
   const delaunay = Delaunator.from(flatCoords);
   const indices = new Uint32Array(delaunay.triangles);
 
-  return { positions, colors, indices };
+  return { positions, colors, indices, rawCoords: coords, rawColors: vertColors };
 }

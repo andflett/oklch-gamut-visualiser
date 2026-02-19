@@ -12,7 +12,10 @@ import {
 const VIEWS = [
   { key: "surface", label: "Surface" },
   { key: "scattered", label: "Scattered" },
-  { key: "points", label: "Point Cloud" },
+  { key: "wireframe", label: "Wireframe" },
+  { key: "contour", label: "Contours" },
+  { key: "heatmap", label: "Heatmap" },
+  { key: "exploded", label: "Exploded" },
   { key: "solid", label: "Solid" },
 ] as const;
 
@@ -25,14 +28,6 @@ function LoadingSpinner() {
     </div>
   );
 }
-
-const ColorTokenGeneratorLandscapeHero = dynamic(
-  () =>
-    import(
-      "@/content/components/color-token-generator-landscape-hero"
-    ).then((m) => m.ColorTokenGeneratorLandscapeHero),
-  { ssr: false, loading: LoadingSpinner }
-);
 
 const ColorTokenGeneratorScatteredHero = dynamic(
   () =>
@@ -58,11 +53,46 @@ const ColorTokenGeneratorSolidHero = dynamic(
   { ssr: false, loading: LoadingSpinner }
 );
 
+const GamutWireframeHero = dynamic(
+  () =>
+    import("@/content/components/gamut-wireframe-hero").then(
+      (m) => m.GamutWireframeHero
+    ),
+  { ssr: false, loading: LoadingSpinner }
+);
+
+const GamutContourHero = dynamic(
+  () =>
+    import("@/content/components/gamut-contour-hero").then(
+      (m) => m.GamutContourHero
+    ),
+  { ssr: false, loading: LoadingSpinner }
+);
+
+const GamutHeatmapHero = dynamic(
+  () =>
+    import("@/content/components/gamut-heatmap-hero").then(
+      (m) => m.GamutHeatmapHero
+    ),
+  { ssr: false, loading: LoadingSpinner }
+);
+
+const GamutExplodedHero = dynamic(
+  () =>
+    import("@/content/components/gamut-exploded-hero").then(
+      (m) => m.GamutExplodedHero
+    ),
+  { ssr: false, loading: LoadingSpinner }
+);
+
 const viewComponents: Record<ViewKey, React.ComponentType> = {
-  solid: ColorTokenGeneratorSolidHero,
   surface: ColorTokenGeneratorMixedHero,
-  points: ColorTokenGeneratorLandscapeHero,
   scattered: ColorTokenGeneratorScatteredHero,
+  wireframe: GamutWireframeHero,
+  contour: GamutContourHero,
+  heatmap: GamutHeatmapHero,
+  exploded: GamutExplodedHero,
+  solid: ColorTokenGeneratorSolidHero,
 };
 
 export default function Page() {
