@@ -10,13 +10,54 @@ import {
 } from "@/components/ui/popover";
 
 const VIEWS = [
-  { key: "surface", label: "Surface" },
-  { key: "scattered", label: "Scattered" },
-  { key: "wireframe", label: "Wireframe" },
-  { key: "contour", label: "Contours" },
-  { key: "heatmap", label: "Heatmap" },
-  { key: "exploded", label: "Exploded" },
-  { key: "solid", label: "Solid" },
+  {
+    key: "surface",
+    label: "Surface",
+    description:
+      "The sRGB gamut boundary rendered as a translucent triangulated surface with a point cloud overlay. The shape of this landscape reveals how the maximum achievable chroma varies across hue and lightness.",
+  },
+  {
+    key: "scattered",
+    label: "Scattered",
+    description:
+      "Each gamut-edge sample randomly offset from the surface, creating a cloud of colour particles. The density of points shows where the gamut boundary is densely sampled by the brute-force RGB scan.",
+  },
+  {
+    key: "wireframe",
+    label: "Wireframe",
+    description:
+      "The Delaunay triangulation edges that form the gamut surface. This shows the underlying mesh structure, triangulated on the lightness-hue plane with chroma as the elevation.",
+  },
+  {
+    key: "heatmap",
+    label: "Heatmap",
+    description:
+      "The gamut surface coloured by chroma intensity rather than the actual colour. Blue regions have low chroma (near grey), while red and white peaks show where sRGB can produce the most saturated colours.",
+  },
+  {
+    key: "lightness",
+    label: "Lightness",
+    description:
+      "The surface coloured solely by its OKLCH lightness value (L), from black to white. This demonstrates how OKLCH cleanly separates perceived brightness from hue and chroma, a key advantage over HSL.",
+  },
+  {
+    key: "constantL",
+    label: "L Slices",
+    description:
+      "Cross-sections at fixed lightness levels (L = 0.3, 0.5, 0.7, 0.85). At any given brightness, the maximum chroma varies dramatically by hue. Yellows and greens peak much higher than blues and purples.",
+  },
+  {
+    key: "p3",
+    label: "P3 vs sRGB",
+    description:
+      "The sRGB gamut (translucent surface) overlaid with the Display P3 gamut (outer point cloud). The points extending beyond the surface are colours only reachable on wide-gamut displays, particularly vivid reds, greens, and cyans.",
+  },
+  {
+    key: "solid",
+    label: "Solid",
+    description:
+      "The gamut boundary as an opaque surface coloured by the actual sRGB values at each point. This is the most direct representation of what the full range of displayable colours looks like in OKLCH coordinates.",
+  },
 ] as const;
 
 type ViewKey = (typeof VIEWS)[number]["key"];
@@ -61,14 +102,6 @@ const GamutWireframeHero = dynamic(
   { ssr: false, loading: LoadingSpinner }
 );
 
-const GamutContourHero = dynamic(
-  () =>
-    import("@/content/components/gamut-contour-hero").then(
-      (m) => m.GamutContourHero
-    ),
-  { ssr: false, loading: LoadingSpinner }
-);
-
 const GamutHeatmapHero = dynamic(
   () =>
     import("@/content/components/gamut-heatmap-hero").then(
@@ -77,10 +110,26 @@ const GamutHeatmapHero = dynamic(
   { ssr: false, loading: LoadingSpinner }
 );
 
-const GamutExplodedHero = dynamic(
+const GamutLightnessHero = dynamic(
   () =>
-    import("@/content/components/gamut-exploded-hero").then(
-      (m) => m.GamutExplodedHero
+    import("@/content/components/gamut-lightness-hero").then(
+      (m) => m.GamutLightnessHero
+    ),
+  { ssr: false, loading: LoadingSpinner }
+);
+
+const GamutConstantLHero = dynamic(
+  () =>
+    import("@/content/components/gamut-constant-l-hero").then(
+      (m) => m.GamutConstantLHero
+    ),
+  { ssr: false, loading: LoadingSpinner }
+);
+
+const GamutP3Hero = dynamic(
+  () =>
+    import("@/content/components/gamut-p3-hero").then(
+      (m) => m.GamutP3Hero
     ),
   { ssr: false, loading: LoadingSpinner }
 );
@@ -89,15 +138,17 @@ const viewComponents: Record<ViewKey, React.ComponentType> = {
   surface: ColorTokenGeneratorMixedHero,
   scattered: ColorTokenGeneratorScatteredHero,
   wireframe: GamutWireframeHero,
-  contour: GamutContourHero,
   heatmap: GamutHeatmapHero,
-  exploded: GamutExplodedHero,
+  lightness: GamutLightnessHero,
+  constantL: GamutConstantLHero,
+  p3: GamutP3Hero,
   solid: ColorTokenGeneratorSolidHero,
 };
 
 export default function Page() {
   const [activeView, setActiveView] = React.useState<ViewKey>("surface");
   const ActiveComponent = viewComponents[activeView];
+  const activeViewData = VIEWS.find((v) => v.key === activeView)!;
 
   const activeIndex = VIEWS.findIndex((v) => v.key === activeView);
   const tabRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
@@ -152,7 +203,7 @@ export default function Page() {
       {/* Bottom-right controls */}
       <div className="absolute bottom-4 right-4 z-10 flex items-center gap-2">
         <a
-          href="https://flett.cc"
+          href="https://www.flett.cc/projects/color-token-generator"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-700/50 backdrop-blur-sm transition-colors"
@@ -174,12 +225,8 @@ export default function Page() {
             align="end"
             className="max-w-xs text-sm border-none rounded-sm shadow-xl"
           >
-            <p className="font-medium mb-1">OKLCH Gamut Landscape</p>
-            <p>
-              A 3D visualisation of the OKLCH colour space gamut boundary,
-              showing the full range of colours displayable on screen mapped
-              across lightness, chroma, and hue axes.
-            </p>
+            <p className="font-medium mb-1">{activeViewData.label}</p>
+            <p>{activeViewData.description}</p>
             <p className="flex mt-3 items-center gap-1.5 text-xs text-slate-400">
               <Move size={12} />
               <span>Drag to rotate</span>
