@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/popover";
 
 const VIEWS = [
+  { key: "solid", label: "Solid" },
   { key: "surface", label: "Surface" },
   { key: "points", label: "Point Cloud" },
   { key: "scattered", label: "Scattered" },
@@ -20,7 +21,7 @@ type ViewKey = (typeof VIEWS)[number]["key"];
 function LoadingSpinner() {
   return (
     <div className="absolute inset-0 flex items-center justify-center">
-      <Loader2 className="size-6 text-slate-400 animate-spin" />
+      <Loader2 className="size-5 text-slate-500 animate-spin" />
     </div>
   );
 }
@@ -49,36 +50,66 @@ const ColorTokenGeneratorMixedHero = dynamic(
   { ssr: false, loading: LoadingSpinner }
 );
 
+const ColorTokenGeneratorSolidHero = dynamic(
+  () =>
+    import(
+      "@/content/components/color-token-generator-solid-hero"
+    ).then((m) => m.ColorTokenGeneratorSolidHero),
+  { ssr: false, loading: LoadingSpinner }
+);
+
 const viewComponents: Record<ViewKey, React.ComponentType> = {
+  solid: ColorTokenGeneratorSolidHero,
   surface: ColorTokenGeneratorMixedHero,
   points: ColorTokenGeneratorLandscapeHero,
   scattered: ColorTokenGeneratorScatteredHero,
 };
 
 export default function Page() {
-  const [activeView, setActiveView] = React.useState<ViewKey>("surface");
+  const [activeView, setActiveView] = React.useState<ViewKey>("solid");
   const ActiveComponent = viewComponents[activeView];
 
+  const activeIndex = VIEWS.findIndex((v) => v.key === activeView);
+  const tabRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
+  const [pillStyle, setPillStyle] = React.useState<React.CSSProperties>({});
+
+  React.useEffect(() => {
+    const el = tabRefs.current[activeIndex];
+    if (el) {
+      setPillStyle({
+        width: el.offsetWidth,
+        transform: `translateX(${el.offsetLeft}px)`,
+      });
+    }
+  }, [activeIndex]);
+
   return (
-    <div className="h-dvh w-dvw overflow-hidden" style={{ backgroundColor: "#324158" }}>
+    <div className="h-dvh w-dvw overflow-hidden bg-slate-950">
       {/* Visualisation */}
       <div className="absolute inset-0">
         <ActiveComponent />
       </div>
 
       {/* Pill tabs — top centre */}
-      <div className="absolute top-5 left-1/2 -translate-x-1/2 z-10">
-        <div className="flex items-center gap-1 rounded-full bg-slate-900/80 backdrop-blur-sm border border-slate-700/60 p-1">
-          {VIEWS.map(({ key, label }) => (
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10">
+        <div className="relative flex items-center rounded-full bg-slate-900/80 backdrop-blur-sm border border-slate-700/60 p-0.5">
+          {/* Sliding pill indicator */}
+          <div
+            className="absolute top-0.5 left-0 h-[calc(100%-4px)] rounded-full bg-white shadow-sm transition-all duration-300 ease-out"
+            style={pillStyle}
+          />
+
+          {VIEWS.map(({ key, label }, i) => (
             <button
               key={key}
+              ref={(el) => { tabRefs.current[i] = el; }}
               onClick={() => setActiveView(key)}
               className={`
-                cursor-pointer px-4 py-1.5 rounded-full text-sm font-medium transition-all
+                relative z-10 cursor-pointer px-3 py-1 rounded-full text-xs font-medium transition-colors duration-200
                 ${
                   activeView === key
-                    ? "bg-white text-slate-900 shadow-sm"
-                    : "text-slate-300 hover:text-white hover:bg-slate-700/50"
+                    ? "text-slate-900"
+                    : "text-slate-400 hover:text-white"
                 }
               `}
             >

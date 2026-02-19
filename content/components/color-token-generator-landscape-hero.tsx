@@ -8,21 +8,38 @@ import { generateLandscapeMesh } from "./oklch-gamut-landscape";
 
 const meshData = generateLandscapeMesh();
 
+// Subsample to ~every 3rd point for a more spaced-out look
+const stride = 3;
+const totalOriginal = meshData.positions.length / 3;
+const sampledCount = Math.ceil(totalOriginal / stride);
+const sampledPositions = new Float32Array(sampledCount * 3);
+const sampledColors = new Float32Array(sampledCount * 3);
+let si = 0;
+for (let i = 0; i < totalOriginal; i += stride) {
+  sampledPositions[si * 3] = meshData.positions[i * 3];
+  sampledPositions[si * 3 + 1] = meshData.positions[i * 3 + 1];
+  sampledPositions[si * 3 + 2] = meshData.positions[i * 3 + 2];
+  sampledColors[si * 3] = meshData.colors[i * 3];
+  sampledColors[si * 3 + 1] = meshData.colors[i * 3 + 1];
+  sampledColors[si * 3 + 2] = meshData.colors[i * 3 + 2];
+  si++;
+}
+
 function LandscapeGamutCloud() {
   const geometry = React.useMemo(() => {
     const geo = new THREE.BufferGeometry();
     geo.setAttribute(
       "position",
-      new THREE.BufferAttribute(meshData.positions, 3)
+      new THREE.BufferAttribute(sampledPositions, 3)
     );
-    geo.setAttribute("color", new THREE.BufferAttribute(meshData.colors, 3));
+    geo.setAttribute("color", new THREE.BufferAttribute(sampledColors, 3));
     geo.center();
     return geo;
   }, []);
 
   return (
     <points geometry={geometry} position={[0, 0.1, 0]}>
-      <pointsMaterial vertexColors size={0.006} sizeAttenuation />
+      <pointsMaterial vertexColors size={0.012} sizeAttenuation />
     </points>
   );
 }
