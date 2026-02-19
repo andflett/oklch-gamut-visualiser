@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import dynamic from "next/dynamic";
-import { Info, Move, ExternalLink, Loader2 } from "lucide-react";
+import { Info, Move, Loader2 } from "lucide-react";
 import {
   Popover,
   PopoverTrigger,
@@ -128,7 +128,6 @@ export default function Page() {
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-700/50 backdrop-blur-sm transition-colors"
         >
           flett.cc
-          <ExternalLink size={12} />
         </a>
 
         <Popover>
